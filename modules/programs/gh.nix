@@ -125,8 +125,11 @@ in {
   config = mkIf cfg.enable {
     home.packages = [ cfg.package ];
 
+    # https://github.com/nix-community/home-manager/issues/4744
+    # If a version key is missing, this will insert it into settings
+    # to prevent gh trying to stuff that in itself and failing.
     xdg.configFile."gh/config.yml".source =
-      yamlFormat.generate "gh-config.yml" cfg.settings;
+      yamlFormat.generate "gh-config.yml" ({ version = "1"; } // cfg.settings);
 
     programs.git.extraConfig.credential = mkIf cfg.gitCredentialHelper.enable
       (builtins.listToAttrs (map (host:
